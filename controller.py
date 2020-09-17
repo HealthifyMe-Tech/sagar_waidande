@@ -1,5 +1,36 @@
 from models import UserGoals
+from models import Goals
 import datetime
+
+
+# age - 10
+# gender - M
+def get_goals(user_id, age , gender):
+    # filter_by
+    ret_res = []
+    for each in Category.objects():
+        each =  each.to_mongo().to_dict()
+        elg_ls = each["eligiblity_name"]
+        for each_elg in elg_ls:
+            if each_elg["name"] == "age":
+                if "gt" in each_elg and age > each_elg["gt"]:
+                    ret_res.append(each)
+
+
+
+   goals = list(Goals.objects(category__in= ret_res))
+
+
+   return {"categories": ret_res, "goals": goals}
+       
+                    
+                    
+
+
+       
+            
+    
+    
 
 
 
