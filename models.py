@@ -20,15 +20,17 @@ class Categories(DynamicDocument):
     # some goals to complete to get to next category.
     unlock_criteria = ListField()  # List of goals to complete.
     type = StringField() # Locked or Unlocked.
-    eligiblity_name = StringField() # Foreign key from CategoryEligibility [{name: age, gt: 18}   # lt, eq, gt
-                                                                           {name: gender, eq: M}]
 
     # index type 
     
 
+class CategoryEligibilty(DynamicDocument):
+    category = StringField() # foreign key
+    criteria = DictField() #keys can be lt eq gt.  Eg- {"age": {"gt": 18}}
+    
+    # composite key -> category, criteria 
+    
 
-class CategoryEligibility(DynamicDocument):
-    name = StringField(unique = True)
 
 
 class Goals(DynamicDocument):

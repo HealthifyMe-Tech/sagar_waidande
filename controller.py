@@ -1,5 +1,4 @@
-from models import UserGoals
-from models import Goals
+from models import UserGoals, Goals
 import datetime
 
 
@@ -8,17 +7,19 @@ import datetime
 def get_goals(user_id, age , gender):
     # filter_by
     ret_res = []
-    for each in Category.objects():
+    
+    for each in CategoryEligibilty.objects():
         each =  each.to_mongo().to_dict()
-        elg_ls = each["eligiblity_name"]
-        for each_elg in elg_ls:
-            if each_elg["name"] == "age":
-                if "gt" in each_elg and age > each_elg["gt"]:
-                    ret_res.append(each)
+        criteria = each["criteria"]
+        if "gt" in criteria.get("age", {}) :
+                if age > criteria["age"]["gt"]:
+                    categ = Categories.objects(title = each["category"]).first().to_mongo.to_dict()
+                    ret_res.append(categ)
 
 
 
-   goals = list(Goals.objects(category__in= ret_res))
+   cat_names = map(lambda ele: ele["title"], ret_res)
+   goals = list(Goals.objects(category__in= cat_names))
 
 
    return {"categories": ret_res, "goals": goals}
@@ -50,16 +51,16 @@ def store_user_goal(data):
         user_goals = UserGoals(user_id = user_id, goal=goal)
 
 
-    if user_goals.type == "action_x_times":
-        user_goals.count_times = user_goals.count_times + 1
-        if user_goals.count_times >=  goal_obj.total_times:
-            user_goals.state = "completed"
+    if user_goals.state == "active":
+        if user_goals.type == "action_x_times":
+            user_goals.count_times = user_goals.count_times + 1
+            if user_goals.count_times >=  goal_obj.total_days:
+                user_goals.state = "completed"
 
         else:
             user_goals.state = "active"
-            if (user_goals.updated_at - user_goals.updated_at).hours > 24:
+            if (user_goals.updated_at - datetime.datetime.utcnow()).hours > 24:
                 user_goals.state = "expired"
-
             
             
 
@@ -70,7 +71,7 @@ def store_user_goal(data):
 
     user_goals.updated_at = datetime.datetime.utcnow()
 
-    
+    return {"success": True}
 
     
 
