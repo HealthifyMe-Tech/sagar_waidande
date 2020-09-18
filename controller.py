@@ -50,8 +50,8 @@ def store_user_goal(data):
     if not user_goals:
         user_goals = UserGoals(user_id = user_id, goal=goal)
 
-
-    if user_goals.state == "active":
+    state = getattr(user_goals, state)
+    if  state == "active" or state == None :
         if user_goals.type == "action_x_times":
             user_goals.count_times = user_goals.count_times + 1
             if user_goals.count_times >=  goal_obj.total_days:
@@ -62,14 +62,8 @@ def store_user_goal(data):
             if (user_goals.updated_at - datetime.datetime.utcnow()).hours > 24:
                 user_goals.state = "expired"
             
-            
-
-        
-
-
-
-
     user_goals.updated_at = datetime.datetime.utcnow()
+    user_goals.save()
 
     return {"success": True}
 
